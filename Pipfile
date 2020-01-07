@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pudb = "*"
+transformers = "*"
+tqdm = "*"
+torch = "*"
+numpy = "*"
+feedparser = "*"
+jsonlines = "*"
+bs4 = "*"
+scikit-learn = "*"
+spacy = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
