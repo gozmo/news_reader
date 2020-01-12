@@ -21,7 +21,7 @@ def latest():
                   "nlp", \
                   "statistics", \
                   "learningmachinelearning"]
-    for subreddit in tqdm(subreddits, desc="reddit"):
+    for subreddit in tqdm(subreddits, desc="reddit", leave=False):
 
         url = f"https://www.reddit.com/r/{subreddit}/.rss"
 
@@ -33,4 +33,5 @@ def latest():
                             source_link = post["link"],
                             source_page =f"reddit-{subreddit}")
             articles.append(article)
+    print("Reddit ✔") 
     return articles

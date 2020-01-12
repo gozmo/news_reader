@@ -12,6 +12,9 @@ from tqdm import tqdm
 import pudb
 from src import io_utils
 import webbrowser
+import datetime
+from dateutil import parser
+
 
 
 def list_articles():
@@ -26,6 +29,7 @@ def update():
     hackernoon_articles = hackernoon.latest()
     medium_articles = medium.latest()
 
+    pu.db
     articles = hn_articles + rd_articles + hackernoon_articles + slashdot_articles + medium_articles
     dataset = ClassificationDataset(articles)
 
@@ -33,7 +37,13 @@ def update():
     bert.load()
     classifications = bert.classify(dataset)
 
-    io_utils.clear_label(Labels.LATEST)
+    latest_clear = parser.parse(io_utils.get_variable("clear_time"))
+    
+    now = datetime.datetime.now()
+    if (now - latest_clear).days > 0:
+           io_utils.clear_label(Labels.LATEST)
+           io_utils.set_variable("clear_time", now.isoformat())
+
     for score, article in zip(classifications, articles):
         article.set_score(score[0])
         if not (io_utils.in_label(Labels.POSITIVE, article) or \

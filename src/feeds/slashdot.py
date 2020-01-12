@@ -7,10 +7,11 @@ def latest():
     posts = feedparser.parse(url)
 
     articles = []
-    for post in tqdm(posts["entries"], desc="slashdot"):
+    for post in tqdm(posts["entries"], desc="slashdot", leave=False):
         article = Entry(text = post["title"], 
                         target_link = post["links"][0]["href"],
                         source_link = post["link"],
                         source_page="slashdot")
         articles.append(article)
+    print("Slashdot ✔") 
     return articles
