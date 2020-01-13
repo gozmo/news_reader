@@ -18,4 +18,7 @@ class Paths:
     BERT_MODEL = f"{HOME}/Dropbox/hackernews/bert.pt"
     FFN_MODEL = f"{HOME}/Dropbox/hackernews/ffn_model.pt"
 
+    VARIABLES = f"{HOME}/Dropbox/hackernews/variables.json"
+
+
 DEVICE = "cpu"
