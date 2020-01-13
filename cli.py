@@ -4,10 +4,10 @@ from src.constants import Labels
 
 def display(articles):
     color_reset = "\033[0m"
-    for idx, article in enumerate(articles[:args.n], 0):
-        if article.score < 0.3:
+    for idx, article in enumerate(articles[:args.n]):
+        if article.score < 0.25:
             color = "\033[91m"
-        elif article.score < 0.5:
+        elif article.score < 0.4:
             color = "\033[33m"
         else:
             color = "\033[32m"
