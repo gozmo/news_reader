@@ -30,7 +30,7 @@ class FeedForwardModel(Module):
 class Bert:
     def __init__(self):
         self.max_length = 30
-        self.batch_size = 32
+        self.batch_size = 64
         self.pad_token = "<pad>"
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', max_length=self.max_length)
         self.ffn_model = FeedForwardModel(self.max_length)
@@ -74,7 +74,7 @@ class Bert:
 
         dataloader = DataLoader(dataset, batch_size=self.batch_size, collate_fn=self.collate_fn, drop_last=False)
 
-        epochs = 10
+        epochs = 3
         batches = int(len(dataset) / self.batch_size)
         self.ffn_model = self.ffn_model.to(DEVICE)
         self.bert = self.bert.to(DEVICE)
@@ -115,7 +115,7 @@ class Bert:
     def optimize_threshold(self, dataset):
         classifications = self.__classify(dataset)
 
-        y_true = [y for x,y in dataset]
+        y_true = [dataset[i][2] for i in range(len(dataset))]
         scores = []
         for threshold in np.arange(0.0, 1.0, 0.01):
             y_pred = [(1 if threshold < score[0] else 0) for score in classifications]
