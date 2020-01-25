@@ -14,6 +14,8 @@ jsonlines = "*"
 bs4 = "*"
 scikit-learn = "*"
 spacy = "*"
+twitter = "*"
+streamlit = "*"
 
 [dev-packages]
 
