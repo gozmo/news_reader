@@ -6,19 +6,14 @@ class Labels:
     LATEST = "latest"
     UNLABELED = "unlabeled"
 
+class Sources:
+    TWITTER = "twitter"
+    NEWS = "news"
+    BLOGS = "blogs"
 
-class Paths:
-    HOME = str(Path.home())
-    NEGATIVE= f"{HOME}/Dropbox/hackernews/negative.jsonl"
-    POSITIVE= f"{HOME}/Dropbox/hackernews/positive.jsonl"
-    UNLABELED= f"{HOME}/Dropbox/hackernews/unlabeled.jsonl"
-    LATEST= f"{HOME}/Dropbox/hackernews/latest.jsonl"
+FFN_MODEL_NAME = "ffn_model.pth"
+TRANSFORMER_MODEL_NAME = "transformer_model.pth"
 
-
-    BERT_MODEL = f"{HOME}/Dropbox/hackernews/bert.pt"
-    FFN_MODEL = f"{HOME}/Dropbox/hackernews/ffn_model.pt"
-
-    VARIABLES = f"{HOME}/Dropbox/hackernews/variables.json"
-
+BASE_PATH = f"{Path.home()}/Dropbox/news_reader/"
 
 DEVICE = "cpu"

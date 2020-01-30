@@ -2,20 +2,14 @@ import jsonlines
 import json
 from src.constants import Paths
 from src.constants import Labels
+from src.constants import BASE_PATH
 from src.entry import Entry 
 
-def get_label_path(label):
-    if label == Labels.POSITIVE:
-        return Paths.POSITIVE
-    elif label == Labels.NEGATIVE:
-        return Paths.NEGATIVE
-    elif label == Labels.LATEST:
-        return Paths.LATEST
-    elif label == Labels.UNLABELED:
-        return Paths.UNLABELED
+def get_label_path(source, label):
+    return f"{BASE_PATH}/{source}/{label}"
 
-def read_label(label):
-    target = get_label_path(label)
+def read_label(source, label):
+    target = get_label_path(source, label)
 
     articles = []
     with jsonlines.open(target) as reader:

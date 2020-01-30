@@ -15,35 +15,44 @@ def display(articles):
         score = f"{color} {article.score} {color_reset}"
         print(f"[{idx}] {score} [{article.source_page}] {article.text}")
 
-parser = argparse.ArgumentParser(description='Rss news reader')
+def setup_parser(parser):
+    parser.add_argument("--negative", type=int, nargs="+",metavar="N")
+    parser.add_argument("--positive", type=int, nargs="+",metavar="N")
+    parser.add_argument("--open", type=int, nargs="+",metavar="N")
+    parser.add_argument("--n", type=int, default=30)
+    parser.add_argument("--update", action="store_true")
+    parser.add_argument("--train", action="store_true")
+    parser.add_argument("--update-scores", action="store_true")
+    parser.add_argument("--unlabeled", action="store_true")
 
-parser.add_argument("--negative", type=int, nargs="+",metavar="N")
-parser.add_argument("--positive", type=int, nargs="+",metavar="N")
-parser.add_argument("--open", type=int, nargs="+",metavar="N")
-parser.add_argument("--n", type=int, default=30)
-parser.add_argument("--update", action="store_true")
-parser.add_argument("--train", action="store_true")
-parser.add_argument("--update-scores", action="store_true")
-parser.add_argument("--unlabeled", action="store_true")
+parser = argparse.ArgumentParser(description='Rss news reader')
+sub_parsers = parser.add_subparsers()
+
+twitter_parser = sub_parsers.add_parser("twitter")
+setup_parser(twitter_parser)
+news_parser = sub_parsers.add_parser("news")
+setup_parser(news_parser)
+blog_parser = sub_parsers.add_parser("blogs")
+setup_parser(blog_parser)
 
 args = parser.parse_args()
 
 if args.update:
-    main.update()
-    main.list_articles()
-if args.negative:
-    main.annotate(args.negative, Labels.NEGATIVE)
+    main.update(args.cmd)
+    main.list_articles(args.cmd)
+elif args.negative:
+    main.annotate(args.cmd, args.negative, Labels.NEGATIVE)
 elif args.positive:
-    main.annotate(args.positive, Labels.POSITIVE)
+    main.annotate(args.cmd, args.positive, Labels.POSITIVE)
 elif args.open:
-    main.open(args.open)
+    main.open(args.cmd, args.open)
 elif args.train:
-    main.train()
+    main.train(args.cmd)
 elif args.update_scores:
-    main.update_scores()
+    main.update_scores(args.cmd)
 elif args.unlabeled:
-    articles = main.unlabeled()
+    articles = main.unlabeled(args.cmd)
     display(articles)
 else:
-    latest_articles = main.list_articles()
+    latest_articles = main.list_articles(args.cmd)
     display(latest_articles)

@@ -1,12 +1,13 @@
 from src.dataset import TrainingDataset
 from src.dataset import ClassificationDataset
-from src.bert import Bert
+from src.transformer import Bert
 from src.constants import Labels
-from src.feeds import hackernews
-from src.feeds import reddit
-from src.feeds import slashdot
-from src.feeds import hackernoon
-from src.feeds import medium
+from src.constants import Sources
+from src.constants import FFN_MODEL_NAME
+from src.constants import TRANSFORMER_MODEL_NAME
+from src.constants import BASE_PATH
+from src.feeds import get_news
+from src.feeds import get_twitter
 
 from tqdm import tqdm
 import pudb
@@ -17,67 +18,72 @@ from dateutil import parser
 
 
 
-def list_articles():
-    latest_articles = io_utils.read_label(Labels.LATEST)
-    latest_articles = sorted(latest_articles, key=lambda x:x.score, reverse=True)
-    return latest_articles
+def list_articles(source, label):
+    articles = io_utils.read_label(source, label)
+    if source == Sources.BLOGS:
+        articles = sorted(latest_articles, key=lambda x:x.publish_time, reverse=True)
+    else:
+        articles = sorted(latest_articles, key=lambda x:x.score, reverse=True)
+    return articles
 
-def update():
-    hn_articles = hackernews.latest()
-    rd_articles = reddit.latest()
-    slashdot_articles = slashdot.latest()
-    hackernoon_articles = hackernoon.latest()
-    medium_articles = medium.latest()
+def update(source):
+    if source == Source.NEWS:
+        entities = get_news()
+        classify = True 
+    elif source == Source.TWITTER:
+        entities = get_twitter()
+        classify = True
+    elif source == source.BLOGS:
+        entities ==get_blogs()
+        classify = False
 
-    pu.db
-    articles = hn_articles + rd_articles + hackernoon_articles + slashdot_articles + medium_articles
-    dataset = ClassificationDataset(articles)
+    if classify:
+        transformer_path = f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
+        ffn_path = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
+        transformer = transformer()
+        transformer.load(transformer_path, ffn_path)
 
-    bert = Bert()
-    bert.load()
-    classifications = bert.classify(dataset)
+        dataset = ClassificationDataset(entities)
+        classifications = transformer.classify(dataset)
+        for score, entity in zip(classifications, entites):
+            entity.set_score(score[0])
 
-    latest_clear = parser.parse(io_utils.get_variable("clear_time"))
-    
-    now = datetime.datetime.now()
-    if (now - latest_clear).days > 0:
-           io_utils.clear_label(Labels.LATEST)
-           io_utils.set_variable("clear_time", now.isoformat())
 
-    for score, article in zip(classifications, articles):
-        article.set_score(score[0])
-        if not (io_utils.in_label(Labels.POSITIVE, article) or \
-                io_utils.in_label(Labels.NEGATIVE, article) or \
-                io_utils.in_label(Labels.UNLABELED, article)):
-            io_utils.append(Labels.LATEST, article)
-            io_utils.append(Labels.UNLABELED, article)
+    for entity in entites:
+        if not (io_utils.in_label(source, Labels.POSITIVE, entity) or \
+                io_utils.in_label(source, Labels.NEGATIVE, entity) or \
+                io_utils.in_label(source, Labels.UNLABELED, entity)):
+            io_utils.append(source, Labels.LATEST, entity)
+            io_utils.append(source, Labels.UNLABELED, entity)
 
-def annotate(indices, label):
-    articles = list_articles()
+    io_utils.remove_old_entites(source, Labels.LATEST, datetime.time(hour=24))
+
+def annotate(source, indices, label):
+    articles = list_articles(source, label)
     articles_to_annotate = [articles[idx] for idx in indices]
 
     for article in articles_to_annotate:
         if label == Labels.POSITIVE or label == Labels.NEGATIVE:
-            io_utils.remove(Labels.LATEST, article)
-            io_utils.remove(Labels.UNLABELED, article)
+            io_utils.remove(source, Labels.LATEST, article)
+            io_utils.remove(source, Labels.UNLABELED, article)
 
-        io_utils.append(label, article)
+        io_utils.append(source, label, article)
 
-def open(numbers):
+def open(source, label, numbers):
     for number in numbers:
-        articles = list_articles()
+        articles = list_articles(source, label)
         article = articles[number]
         webbrowser.open(article.target_link)
     annotate(numbers, Labels.POSITIVE)
 
-def train():
+def train(source):
     dataset = TrainingDataset()
 
     bert = Bert()
     bert.train(dataset)
     bert.save()
 
-def update_scores():
+def update_scores(source):
     bert = Bert()
     bert.load()
     for label in [Labels.LATEST, Labels.POSITIVE, Labels.NEGATIVE, Labels.UNLABELED]:
@@ -91,7 +97,7 @@ def update_scores():
             article.score = score[0]
             io_utils.append(label, article)
 
-def unlabeled():
+def unlabeled(source):
     articles = io_utils.read_label(Labels.UNLABELED)
     articles = sorted(articles, key=lambda x:x.score, reverse=True)
     return articles
