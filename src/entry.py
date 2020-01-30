@@ -1,17 +1,16 @@
+import dateutil.parser
+
 class Entry:
     def __init__(self, text,
-                       source_link,
-                       publish_time,
+                       link,
+                       publish_time: str,
+                       source,
                        score=0.0):
         self.text = text
-        self.source_link = source_link
-        self.score = round(score, 2)
-        self.source_page = source_page
-        
-        if type(publish_time) == str:
-
-
-        self.publish_time = publish_time
+        self.link = link
+        self.set_score(score)
+        self.source = source
+        self.publish_time = dateutil.parser.parse(publish_time)
 
     def set_score(self, score):
         self.score = score
@@ -20,7 +19,7 @@ class Entry:
         return {"text": self.text,
                 "source_link": self.source_link,
                 "score"      : self.score,
-                "publish_time": self.publish_time,
+                "publish_time": self.publish_time.isoformat(),
                 "source_page": self.source_page}
 
     def __hash__(self):

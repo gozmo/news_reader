@@ -26,7 +26,8 @@ def setup_parser(parser):
     parser.add_argument("--unlabeled", action="store_true")
 
 parser = argparse.ArgumentParser(description='Rss news reader')
-sub_parsers = parser.add_subparsers()
+parser.add_argument("--init", action="store_true")
+sub_parsers = parser.add_subparsers(dest="source")
 
 twitter_parser = sub_parsers.add_parser("twitter")
 setup_parser(twitter_parser)
@@ -37,22 +38,24 @@ setup_parser(blog_parser)
 
 args = parser.parse_args()
 
-if args.update:
-    main.update(args.cmd)
-    main.list_articles(args.cmd)
+if args.init:
+    main.init()
+elif args.update:
+    main.update(args.source)
+    main.list_articles(args.source)
 elif args.negative:
-    main.annotate(args.cmd, args.negative, Labels.NEGATIVE)
+    main.annotate(args.source, args.negative, Labels.NEGATIVE)
 elif args.positive:
-    main.annotate(args.cmd, args.positive, Labels.POSITIVE)
+    main.annotate(args.source, args.positive, Labels.POSITIVE)
 elif args.open:
-    main.open(args.cmd, args.open)
+    main.open_link(args.source, args.open)
 elif args.train:
-    main.train(args.cmd)
+    main.train(args.source)
 elif args.update_scores:
-    main.update_scores(args.cmd)
+    main.update_scores(args.source)
 elif args.unlabeled:
-    articles = main.unlabeled(args.cmd)
+    articles = main.unlabeled(args.source)
     display(articles)
 else:
-    latest_articles = main.list_articles(args.cmd)
+    latest_articles = main.list_articles(args.source)
     display(latest_articles)

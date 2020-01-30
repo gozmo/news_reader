@@ -1,5 +1,7 @@
 from src.constants import DEVICE
-from src.constants import Paths
+from src.constants import BASE_PATH
+from src.constants import FFN_MODEL_NAME
+from src.constants import TRANSFORMER_MODEL_NAME
 from src.dataset import Dataset
 from torch import tensor
 from torch.nn import BCELoss
@@ -198,12 +200,19 @@ class Bert:
             padded_abstract = abstract[0:self.max_length]
         return padded_abstract
 
-    def save(self):
-        torch.save(self.ffn_model, Paths.FFN_MODEL)
-        torch.save(self.bert, Paths.BERT_MODEL)
+    def __make_paths(self, source):
+        ffn = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
+        transformer= f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
+        return transformer, ffn
 
-    def load(self):
-        self.ffn_model = torch.load(Paths.FFN_MODEL, map_location=torch.device(DEVICE))
-        self.bert = torch.load(Paths.BERT_MODEL, map_location=torch.device(DEVICE))
+    def save(self, source):
+        transformer_path, ffn_path = self.__make_paths(source)
+        torch.save(self.ffn_model, ffn_path)
+        torch.save(self.bert, transformer_path)
+
+    def load(self, source):
+        transformer_path, ffn_path = self.__make_paths(source)
+        self.ffn_model = torch.load(ffn_path, map_location=torch.device(DEVICE))
+        self.bert = torch.load(transformer_path, map_location=torch.device(DEVICE))
 
 

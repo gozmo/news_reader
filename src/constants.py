@@ -14,6 +14,6 @@ class Sources:
 FFN_MODEL_NAME = "ffn_model.pth"
 TRANSFORMER_MODEL_NAME = "transformer_model.pth"
 
-BASE_PATH = f"{Path.home()}/Dropbox/news_reader/"
+BASE_PATH = f"{Path.home()}/Dropbox/news_reader"
 
 DEVICE = "cpu"

@@ -3,11 +3,11 @@ from src.dataset import ClassificationDataset
 from src.transformer import Bert
 from src.constants import Labels
 from src.constants import Sources
-from src.constants import FFN_MODEL_NAME
-from src.constants import TRANSFORMER_MODEL_NAME
 from src.constants import BASE_PATH
 from src.feeds import get_news
 from src.feeds import get_twitter
+import json
+import os
 
 from tqdm import tqdm
 import pudb
@@ -27,29 +27,27 @@ def list_articles(source, label):
     return articles
 
 def update(source):
-    if source == Source.NEWS:
+    if source == Sources.NEWS:
         entities = get_news()
         classify = True 
-    elif source == Source.TWITTER:
+    elif source == Sources.TWITTER:
         entities = get_twitter()
         classify = True
-    elif source == source.BLOGS:
+    elif source == Sources.BLOGS:
         entities ==get_blogs()
         classify = False
 
     if classify:
-        transformer_path = f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
-        ffn_path = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
-        transformer = transformer()
-        transformer.load(transformer_path, ffn_path)
+        transformer = Bert()
+        transformer.load(source)
 
         dataset = ClassificationDataset(entities)
         classifications = transformer.classify(dataset)
-        for score, entity in zip(classifications, entites):
+        for score, entity in zip(classifications, entities):
             entity.set_score(score[0])
 
 
-    for entity in entites:
+    for entity in entities:
         if not (io_utils.in_label(source, Labels.POSITIVE, entity) or \
                 io_utils.in_label(source, Labels.NEGATIVE, entity) or \
                 io_utils.in_label(source, Labels.UNLABELED, entity)):
@@ -69,7 +67,7 @@ def annotate(source, indices, label):
 
         io_utils.append(source, label, article)
 
-def open(source, label, numbers):
+def open_link(source, label, numbers):
     for number in numbers:
         articles = list_articles(source, label)
         article = articles[number]
@@ -81,11 +79,11 @@ def train(source):
 
     bert = Bert()
     bert.train(dataset)
-    bert.save()
+    bert.save(source)
 
 def update_scores(source):
     bert = Bert()
-    bert.load()
+    bert.load(source)
     for label in [Labels.LATEST, Labels.POSITIVE, Labels.NEGATIVE, Labels.UNLABELED]:
         articles = io_utils.read_label(label)
 
@@ -102,3 +100,13 @@ def unlabeled(source):
     articles = sorted(articles, key=lambda x:x.score, reverse=True)
     return articles
 
+def init():
+    for source in [Sources.TWITTER, Sources.NEWS, Sources.BLOGS]:
+        path = f"{BASE_PATH}/{source}"
+        os.makedirs(path, exist_ok=True)
+        bert = Bert()
+        bert.save(source)
+        for label in [Labels.NEGATIVE, Labels.POSITIVE, Labels.LATEST, Labels.UNLABELED]:
+            path = f"{BASE_PATH}/{source}/{label}"
+            with open(path, "w") as f:
+                json.dump({}, f)
