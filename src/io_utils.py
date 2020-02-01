@@ -1,6 +1,7 @@
 import jsonlines
 import json
 from src.constants import Paths
+import datetime
 from src.constants import Labels
 from src.constants import BASE_PATH
 from src.entry import Entry 
@@ -19,8 +20,8 @@ def read_label(source, label):
 
     return articles
 
-def clear_label(label):
-    path = get_label_path(label)
+def clear_label(source, label):
+    path = get_label_path(source, label)
     with open(path, "w") as f:
         f.write("")
 
@@ -28,17 +29,17 @@ def in_label(label, article):
     articles = read_label(label)
     return article in articles
 
-def append(label, article):
-    articles = read_label(label)
+def append(source, label, article):
+    articles = read_label(source, label)
     if article in articles:
         return
 
-    target = get_label_path(label)
+    target = get_label_path(source, label)
     with jsonlines.open(target, "a") as writer:
         writer.write(article.to_dict())
 
-def remove(label, article_to_remove):
-    target = get_label_path(label)
+def remove(source, label, article_to_remove):
+    target = get_label_path(source, label)
     articles = []
     with jsonlines.open(target) as reader:
         for elem in reader:
@@ -46,20 +47,14 @@ def remove(label, article_to_remove):
             if article != article_to_remove:
                 articles.append(article)
 
-    clear_label(label)
+    clear_label(source, label)
     with jsonlines.open(target, "a") as writer:
         for article in articles:
             writer.write(article.to_dict())
 
-def set_variable(key, value):
-    with open(Paths.VARIABLES, "r") as f:
-        variables = json.load(f)
-    variables[key] = value
-
-    with open(Paths.VARIABLES, "w") as f:
-        json.dump(variables, f)
-
-def get_variable(key):
-    with open(Paths.VARIABLES, "r") as f:
-        variables = json.load(f)
-    return variables[key]
+def remove_old_entries(source, label, time_limit):
+    articles = read_label(source, label)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    for article in articles:
+        if time_limit < now - article.publish_time:
+            remove(source, label, article)

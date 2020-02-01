@@ -2,7 +2,7 @@ from pathlib import Path
 
 class Labels: 
     NEGATIVE = "negative"
-    POSITIVE = " positive"
+    POSITIVE = "positive"
     LATEST = "latest"
     UNLABELED = "unlabeled"
 

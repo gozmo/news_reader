@@ -13,7 +13,7 @@ def display(articles):
         else:
             color = "\033[32m"
         score = f"{color} {article.score} {color_reset}"
-        print(f"[{idx}] {score} [{article.source_page}] {article.text}")
+        print(f"[{idx}] {score} [{article.source}] {article.text}")
 
 def setup_parser(parser):
     parser.add_argument("--negative", type=int, nargs="+",metavar="N")
@@ -37,9 +37,11 @@ setup_parser(blog_parser)
 
 args = parser.parse_args()
 
-if args.update:
-    main.update(args.cmd)
-    main.list_articles(args.cmd)
+if args.init:
+    main.init()
+elif args.update:
+    main.update(args.source)
+    main.list_articles(args.source, "latest")
 elif args.negative:
     main.annotate(args.cmd, args.negative, Labels.NEGATIVE)
 elif args.positive:
@@ -54,5 +56,5 @@ elif args.unlabeled:
     articles = main.unlabeled(args.cmd)
     display(articles)
 else:
-    latest_articles = main.list_articles(args.cmd)
+    latest_articles = main.list_articles(args.source, "latest")
     display(latest_articles)

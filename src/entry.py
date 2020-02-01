@@ -14,14 +14,14 @@ class Entry:
         self.publish_time = publish_time
 
     def set_score(self, score):
-        self.score = score
+        self.score = round(score, 2)
 
     def to_dict(self):
         return {"text": self.text,
-                "source_link": self.source_link,
+                "link": self.link,
                 "score"      : self.score,
-                "publish_time": self.publish_time,
-                "source_page": self.source_page}
+                "source": self.source,
+                "publish_time": self.publish_time.isoformat()}
 
     def __hash__(self):
         return hash(self.text)

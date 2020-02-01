@@ -21,9 +21,9 @@ from dateutil import parser
 def list_articles(source, label):
     articles = io_utils.read_label(source, label)
     if source == Sources.BLOGS:
-        articles = sorted(latest_articles, key=lambda x:x.publish_time, reverse=True)
+        articles = sorted(articles, key=lambda x:x.publish_time, reverse=True)
     else:
-        articles = sorted(latest_articles, key=lambda x:x.score, reverse=True)
+        articles = sorted(articles, key=lambda x:x.score, reverse=True)
     return articles
 
 def update(source):
@@ -56,7 +56,7 @@ def update(source):
             io_utils.append(source, Labels.LATEST, entity)
             io_utils.append(source, Labels.UNLABELED, entity)
 
-    io_utils.remove_old_entites(source, Labels.LATEST, datetime.time(hour=24))
+    io_utils.remove_old_entries(source, Labels.LATEST, datetime.timedelta(hours=24))
 
 def annotate(source, indices, label):
     articles = list_articles(source, label)
@@ -102,3 +102,13 @@ def unlabeled(source):
     articles = sorted(articles, key=lambda x:x.score, reverse=True)
     return articles
 
+def init():
+    for source in [Sources.TWITTER, Sources.NEWS, Sources.BLOGS]:
+        path = f"{BASE_PATH}/{source}"
+        os.makedirs(path, exist_ok=True)
+        bert = Bert()
+        bert.save(source)
+        for label in [Labels.NEGATIVE, Labels.POSITIVE, Labels.LATEST, Labels.UNLABELED]:
+            path = f"{BASE_PATH}/{source}/{label}"
+            with open(path, "w") as f:
+                f.write("")
