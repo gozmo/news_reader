@@ -1,5 +1,4 @@
 from src.constants import DEVICE
-from src.constants import Paths
 from src.dataset import Dataset
 from torch import tensor
 from torch.nn import BCELoss
@@ -46,7 +45,7 @@ class Bert:
 
     def forward_bert(self, x, attention_mask):
         batch_size = x.shape[0]
-        bert_output = self.bert(x, attention_mask=attention_mask)
+        bert_output = self.bert.forward(x, attention_mask=attention_mask)
         bert_output = bert_output[0]
         output_1 = torch.zeros((batch_size, 768)).to(DEVICE)
         for i in range(batch_size):
@@ -198,12 +197,12 @@ class Bert:
             padded_abstract = abstract[0:self.max_length]
         return padded_abstract
 
-    def save(self):
-        torch.save(self.ffn_model, Paths.FFN_MODEL)
-        torch.save(self.bert, Paths.BERT_MODEL)
+    def save(self, path_transformer, path_ffn):
+        torch.save(self.ffn_model, path_ffn)
+        torch.save(self.bert, path_transformer)
 
-    def load(self):
-        self.ffn_model = torch.load(Paths.FFN_MODEL, map_location=torch.device(DEVICE))
-        self.bert = torch.load(Paths.BERT_MODEL, map_location=torch.device(DEVICE))
+    def load(self, path_transformer, path_ffn):
+        self.ffn_model = torch.load(path_ffn, map_location=torch.device(DEVICE))
+        self.bert = torch.load(path_transformer, map_location=torch.device(DEVICE))
 
 

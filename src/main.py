@@ -27,29 +27,29 @@ def list_articles(source, label):
     return articles
 
 def update(source):
-    if source == Source.NEWS:
+    if source == Sources.NEWS:
         entities = get_news()
         classify = True 
-    elif source == Source.TWITTER:
+    elif source == Sources.TWITTER:
         entities = get_twitter()
         classify = True
-    elif source == source.BLOGS:
+    elif source == sources.BLOGS:
         entities ==get_blogs()
         classify = False
 
     if classify:
         transformer_path = f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
         ffn_path = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
-        transformer = transformer()
+        transformer = Bert()
         transformer.load(transformer_path, ffn_path)
 
         dataset = ClassificationDataset(entities)
         classifications = transformer.classify(dataset)
-        for score, entity in zip(classifications, entites):
+        for score, entity in zip(classifications, entities):
             entity.set_score(score[0])
 
 
-    for entity in entites:
+    for entity in entities:
         if not (io_utils.in_label(source, Labels.POSITIVE, entity) or \
                 io_utils.in_label(source, Labels.NEGATIVE, entity) or \
                 io_utils.in_label(source, Labels.UNLABELED, entity)):

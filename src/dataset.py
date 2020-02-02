@@ -30,7 +30,7 @@ class TrainingDataset(BaseDataset):
 
     def __getitem__(self, idx):
         text = self.papers[idx][0].text
-        source_page = self.papers[idx][0].source_page
+        source_page = self.papers[idx][0].source
         label = self.papers[idx][1]
 
         return source_page, text, label
@@ -41,7 +41,7 @@ class ClassificationDataset(BaseDataset):
 
     def __getitem__(self, idx):
         text = self.papers[idx].text
-        source_page = self.papers[idx].source_page
+        source_page = self.papers[idx].source
         label = 0.0
 
         return source_page, text, label

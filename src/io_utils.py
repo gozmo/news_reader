@@ -1,6 +1,5 @@
 import jsonlines
 import json
-from src.constants import Paths
 import datetime
 from src.constants import Labels
 from src.constants import BASE_PATH
@@ -25,8 +24,8 @@ def clear_label(source, label):
     with open(path, "w") as f:
         f.write("")
 
-def in_label(label, article):
-    articles = read_label(label)
+def in_label(source, label, article):
+    articles = read_label(source, label)
     return article in articles
 
 def append(source, label, article):
@@ -58,3 +57,8 @@ def remove_old_entries(source, label, time_limit):
     for article in articles:
         if time_limit < now - article.publish_time:
             remove(source, label, article)
+
+def read_file(filepath):
+    with open(filepath, "r") as f:
+        content = f.read()
+    return content.strip()

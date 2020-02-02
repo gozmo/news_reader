@@ -1,16 +1,14 @@
 class Entry:
     def __init__(self, text,
-                       source_link,
-                       publish_time,
-                       score=0.0):
+                       link,
+                       publish_time=None,
+                       score=0.0,
+                       source=""):
         self.text = text
-        self.source_link = source_link
+        self.link = link
         self.score = round(score, 2)
-        self.source_page = source_page
+        self.source = source
         
-        if type(publish_time) == str:
-
-
         self.publish_time = publish_time
 
     def set_score(self, score):
@@ -19,7 +17,7 @@ class Entry:
     def to_dict(self):
         return {"text": self.text,
                 "link": self.link,
-                "score"      : self.score,
+                "score": self.score,
                 "source": self.source,
                 "publish_time": self.publish_time.isoformat()}
 
