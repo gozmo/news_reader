@@ -1,11 +1,13 @@
-import feedparser
-import dateutil.parser
+from datetime import datetime
+from src import constants
+from src import io_utils
+from src.entry import Entry
+from time import mktime
+from tqdm import tqdm
 from twitter import OAuth
 from twitter import Twitter
-from src.entry import Entry
-from tqdm import tqdm
-from src import io_utils
-from src import constants
+import dateutil.parser
+import feedparser
 
 def get_news():
     sources = [("hackernews", "https://news.ycombinator.com/rss"),
@@ -42,13 +44,15 @@ def get_news():
     sources.extend(medium)
     sources.extend(hackernoon)
 
+
     articles = []
     for source, url in tqdm(sources, desc="Feeds"):
         posts = feedparser.parse(url)
         for post in posts["entries"]:
+            dt = datetime.fromtimestamp(mktime(post["updated_parsed"]))
             article = Entry(text = post["title"], 
                             link = post["links"][0]["href"],
-                            publish_time = post["updated_parsed"],
+                            publish_time = dt,
                             source=source)
             articles.append(article)
     return articles

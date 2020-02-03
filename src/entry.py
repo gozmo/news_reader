@@ -1,3 +1,5 @@
+from dateutil import parser
+
 class Entry:
     def __init__(self, text,
                        link,
@@ -9,7 +11,10 @@ class Entry:
         self.score = round(score, 2)
         self.source = source
         
-        self.publish_time = publish_time
+        if type(publish_time) == str:
+            self.publish_time = parser.parse(publish_time) 
+        else:
+            self.publish_time = publish_time
 
     def set_score(self, score):
         self.score = round(score, 2)

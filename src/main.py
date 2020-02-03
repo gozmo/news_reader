@@ -49,7 +49,7 @@ def update(source):
             entity.set_score(score[0])
 
 
-    for entity in entities:
+    for entity in tqdm(entities, desc="IO operations"):
         if not (io_utils.in_label(source, Labels.POSITIVE, entity) or \
                 io_utils.in_label(source, Labels.NEGATIVE, entity) or \
                 io_utils.in_label(source, Labels.UNLABELED, entity)):
