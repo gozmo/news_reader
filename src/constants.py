@@ -1,24 +1,26 @@
 from pathlib import Path
 
+BASE_PATH = f"{Path.home()}/Dropbox/news_reader/"
+
 class Labels: 
     NEGATIVE = "negative"
-    POSITIVE = " positive"
+    POSITIVE = "positive"
     LATEST = "latest"
     UNLABELED = "unlabeled"
 
+class Sources:
+    TWITTER = "twitter"
+    NEWS = "news"
+    BLOGS = "blogs"
 
-class Paths:
-    HOME = str(Path.home())
-    NEGATIVE= f"{HOME}/Dropbox/hackernews/negative.jsonl"
-    POSITIVE= f"{HOME}/Dropbox/hackernews/positive.jsonl"
-    UNLABELED= f"{HOME}/Dropbox/hackernews/unlabeled.jsonl"
-    LATEST= f"{HOME}/Dropbox/hackernews/latest.jsonl"
+class Twitter:
+    CONSUMER_TOKEN = f"{BASE_PATH}/twitter/keys/consumer_token"
+    CONSUMER_SECRET = f"{BASE_PATH}/twitter/keys/consumer_token_secret"
+    ACCESS_TOKEN = f"{BASE_PATH}/twitter/keys/access_token"
+    ACCESS_SECRET = f"{BASE_PATH}/twitter/keys/access_token_secret"
 
-
-    BERT_MODEL = f"{HOME}/Dropbox/hackernews/bert.pt"
-    FFN_MODEL = f"{HOME}/Dropbox/hackernews/ffn_model.pt"
-
-    VARIABLES = f"{HOME}/Dropbox/hackernews/variables.json"
+FFN_MODEL_NAME = "ffn_model.pth"
+TRANSFORMER_MODEL_NAME = "transformer_model.pth"
 
 
 DEVICE = "cpu"
