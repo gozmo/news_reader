@@ -1,4 +1,7 @@
 from src.constants import DEVICE
+from src.constants import BASE_PATH
+from src.constants import FFN_MODEL_NAME
+from src.constants import TRANSFORMER_MODEL_NAME
 from src.dataset import Dataset
 from torch import tensor
 from torch.nn import BCELoss
@@ -114,7 +117,7 @@ class Bert:
     def optimize_threshold(self, dataset):
         classifications = self.__classify(dataset)
 
-        y_true = [y for x,y in dataset]
+        y_true = [y for s,x,y in dataset]
         scores = []
         for threshold in np.arange(0.0, 1.0, 0.01):
             y_pred = [(1 if threshold < score[0] else 0) for score in classifications]
@@ -197,9 +200,11 @@ class Bert:
             padded_abstract = abstract[0:self.max_length]
         return padded_abstract
 
-    def save(self, path_transformer, path_ffn):
-        torch.save(self.ffn_model, path_ffn)
-        torch.save(self.bert, path_transformer)
+    def save(self, source):
+        transformer_path = f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
+        ffn_path = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
+        torch.save(self.ffn_model, ffn_path)
+        torch.save(self.bert, transformer_path)
 
     def load(self, path_transformer, path_ffn):
         self.ffn_model = torch.load(path_ffn, map_location=torch.device(DEVICE))

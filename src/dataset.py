@@ -18,11 +18,11 @@ class BaseDataset(Dataset):
         return self.papers[idx]
 
 class TrainingDataset(BaseDataset):
-    def __init__(self):
-        positives = io_utils.read_label(Labels.POSITIVE)
+    def __init__(self, source):
+        positives = io_utils.read_label(source, Labels.POSITIVE)
         positives = zip(positives, [1.0]*len(positives))
 
-        negatives = io_utils.read_label(Labels.NEGATIVE)
+        negatives = io_utils.read_label(source, Labels.NEGATIVE)
         negatives = zip(negatives, [0.0]*len(negatives))
 
         papers = list(positives) + list(negatives)

@@ -18,11 +18,15 @@ from dateutil import parser
 
 
 
-def list_articles(source, label):
+def list_articles(source, label, all_entries):
     articles = io_utils.read_label(source, label)
-    if source == Sources.BLOGS:
+    if source == Sources.BLOGS: 
         articles = sorted(articles, key=lambda x:x.publish_time, reverse=True)
-    else:
+    elif source == Sources.TWITTER:
+        articles = sorted(articles, key=lambda x:x.publish_time, reverse=True)
+        if not all_entries:
+            articles = [article for article in articles if article.score > 0.15]
+    elif source == Sources.NEWS:
         articles = sorted(articles, key=lambda x:x.score, reverse=True)
     return articles
 
@@ -59,7 +63,7 @@ def update(source):
     io_utils.remove_old_entries(source, Labels.LATEST, datetime.timedelta(hours=24))
 
 def annotate(source, indices, label):
-    articles = list_articles(source, label)
+    articles = list_articles(source, Labels.LATEST, True)
     articles_to_annotate = [articles[idx] for idx in indices]
 
     for article in articles_to_annotate:
@@ -71,17 +75,17 @@ def annotate(source, indices, label):
 
 def open(source, label, numbers):
     for number in numbers:
-        articles = list_articles(source, label)
+        articles = list_articles(source, label, True)
         article = articles[number]
         webbrowser.open(article.target_link)
     annotate(numbers, Labels.POSITIVE)
 
 def train(source):
-    dataset = TrainingDataset()
+    dataset = TrainingDataset(source)
 
     bert = Bert()
     bert.train(dataset)
-    bert.save()
+    bert.save(source)
 
 def update_scores(source):
     bert = Bert()

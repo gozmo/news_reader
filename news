@@ -3,17 +3,23 @@ import argparse
 from src import main
 from src.constants import Labels
 
-def display(articles):
+def score_string(score):
     color_reset = "\033[0m"
+    if score < 0.3:
+        color = "\033[91m"
+    elif score < 0.5:
+        color = "\033[33m"
+    else:
+        color = "\033[32m"
+    score = f"{color} {score} {color_reset}"
+    return score
+
+def display(articles, source):
     for idx, article in enumerate(articles[:args.n], 0):
-        if article.score < 0.3:
-            color = "\033[91m"
-        elif article.score < 0.5:
-            color = "\033[33m"
-        else:
-            color = "\033[32m"
-        score = f"{color} {article.score} {color_reset}"
-        print(f"[{idx}] {score} [{article.source}] {article.text}")
+        score = score_string(article.score)
+        text = article.text.replace("\n", " ")
+
+        print(f"[{idx}] {score} {article.source}, {text}")
 
 def setup_parser(parser):
     parser.add_argument("--negative", type=int, nargs="+",metavar="N")
@@ -24,6 +30,7 @@ def setup_parser(parser):
     parser.add_argument("--train", action="store_true")
     parser.add_argument("--update-scores", action="store_true")
     parser.add_argument("--unlabeled", action="store_true")
+    parser.add_argument("--all", action="store_true", default=False)
 
 parser = argparse.ArgumentParser(description='Rss news reader')
 parser.add_argument("--init", action="store_true")
@@ -43,20 +50,20 @@ if args.init:
     main.init()
 elif args.update:
     main.update(args.source)
-    main.list_articles(args.source, "latest")
+    main.list_articles(args.source, "latest", False)
 elif args.negative:
-    main.annotate(args.cmd, args.negative, Labels.NEGATIVE)
+    main.annotate(args.source, args.negative, Labels.NEGATIVE)
 elif args.positive:
-    main.annotate(args.cmd, args.positive, Labels.POSITIVE)
+    main.annotate(args.source, args.positive, Labels.POSITIVE)
 elif args.open:
-    main.open(args.cmd, args.open)
+    main.open(args.source, args.open)
 elif args.train:
-    main.train(args.cmd)
+    main.train(args.source)
 elif args.update_scores:
-    main.update_scores(args.cmd)
+    main.update_scores(args.source)
 elif args.unlabeled:
-    articles = main.unlabeled(args.cmd)
+    articles = main.unlabeled(args.source)
     display(articles)
 else:
-    latest_articles = main.list_articles(args.source, "latest")
-    display(latest_articles)
+    latest_articles = main.list_articles(args.source, "latest", args.all)
+    display(latest_articles, args.source)
