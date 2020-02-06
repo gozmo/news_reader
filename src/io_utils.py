@@ -53,9 +53,8 @@ def remove(source, label, article_to_remove):
             writer.write(article.to_dict())
 
 def remove_old_entries(source, label, time_limit):
-    pu.db
     articles = read_label(source, label)
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.timezone.utc)
     for article in tqdm(articles, desc="remove"):
         if time_limit < now - article.publish_time:
             remove(source, label, article)
