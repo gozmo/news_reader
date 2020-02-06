@@ -207,8 +207,10 @@ class Bert:
         torch.save(self.ffn_model, ffn_path)
         torch.save(self.bert, transformer_path)
 
-    def load(self, path_transformer, path_ffn):
-        self.ffn_model = torch.load(path_ffn, map_location=torch.device(DEVICE))
-        self.bert = torch.load(path_transformer, map_location=torch.device(DEVICE))
+    def load(self, source):
+        transformer_path = f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
+        ffn_path = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
+        self.ffn_model = torch.load(ffn_path, map_location=torch.device(DEVICE))
+        self.bert = torch.load(transformer_path, map_location=torch.device(DEVICE))
 
 
