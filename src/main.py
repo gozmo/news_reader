@@ -42,10 +42,8 @@ def update(source):
         classify = False
 
     if classify:
-        transformer_path = f"{BASE_PATH}/{source}/{TRANSFORMER_MODEL_NAME}"
-        ffn_path = f"{BASE_PATH}/{source}/{FFN_MODEL_NAME}"
         transformer = Bert()
-        transformer.load(transformer_path, ffn_path)
+        transformer.load(source)
 
         dataset = ClassificationDataset(entities)
         classifications = transformer.classify(dataset)
@@ -89,7 +87,7 @@ def train(source):
 
 def update_scores(source):
     bert = Bert()
-    bert.load()
+    bert.load(source)
     for label in [Labels.LATEST, Labels.POSITIVE, Labels.NEGATIVE, Labels.UNLABELED]:
         articles = io_utils.read_label(label)
 
