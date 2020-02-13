@@ -17,6 +17,7 @@ spacy = "*"
 twitter = "*"
 streamlit = "*"
 python-dateutil = "*"
+pytz = "*"
 
 [dev-packages]
 

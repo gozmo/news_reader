@@ -14,8 +14,8 @@ def score_string(score):
     score = f"{color} {score} {color_reset}"
     return score
 
-def display(articles, source):
-    for idx, article in enumerate(articles[:args.n], 0):
+def display(articles, source, n):
+    for idx, article in enumerate(articles[:n], 0):
         score = score_string(article.score)
         text = article.text.replace("\n", " ")
 
@@ -26,11 +26,13 @@ def setup_parser(parser):
     parser.add_argument("--positive", type=int, nargs="+",metavar="N")
     parser.add_argument("--open", type=int, nargs="+",metavar="N")
     parser.add_argument("--n", type=int, default=30)
-    parser.add_argument("--update", action="store_true")
-    parser.add_argument("--train", action="store_true")
-    parser.add_argument("--update-scores", action="store_true")
-    parser.add_argument("--unlabeled", action="store_true")
+    parser.add_argument("--update", action="store_true", default=False)
+    parser.add_argument("--train", action="store_true", default=False)
+    parser.add_argument("--update-scores", action="store_true", default=False)
+    parser.add_argument("--unlabeled", action="store_true", default=False)
     parser.add_argument("--all", action="store_true", default=False)
+
+
 
 parser = argparse.ArgumentParser(description='Rss news reader')
 parser.add_argument("--init", action="store_true")
@@ -45,8 +47,14 @@ blog_parser = sub_parsers.add_parser("blogs")
 setup_parser(blog_parser)
 
 args = parser.parse_args()
+print(args)
 
-if args.init:
+if args.source is None:
+    for source in ["twitter", "news"]:
+        print(f"## {source} ##")
+        latest_articles = main.list_articles(source, "latest", False)
+        display(latest_articles, source, 10)
+elif args.init:
     main.init()
 elif args.update:
     main.update(args.source)
@@ -63,7 +71,9 @@ elif args.update_scores:
     main.update_scores(args.source)
 elif args.unlabeled:
     articles = main.unlabeled(args.source)
-    display(articles)
-else:
+    display(articles, args.source, 20)
+elif args.source:
     latest_articles = main.list_articles(args.source, "latest", args.all)
-    display(latest_articles, args.source)
+    display(latest_articles, args.source, 20)
+else:
+    pass

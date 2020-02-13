@@ -8,11 +8,15 @@ from twitter import OAuth
 from twitter import Twitter
 import dateutil.parser
 import feedparser
+import pytz
 
 def get_news():
     sources = [("hackernews", "https://news.ycombinator.com/rss"),
                ("slashdot", "http://rss.slashdot.org/Slashdot/slashdotMain")]
-
+    #https://www.microsoft.com/en-us/research/blog/
+    #https://ai.facebook.com/blog/
+    # https://openai.com/blog/
+    #https://deepmind.com/blog 
     subreddits = ["machinelearning", \
                   "python", \
                   "linux", \
@@ -50,6 +54,7 @@ def get_news():
         posts = feedparser.parse(url)
         for post in posts["entries"]:
             dt = datetime.fromtimestamp(mktime(post["updated_parsed"]))
+            dt = pytz.utc.localize(dt)
             article = Entry(text = post["title"], 
                             link = post["links"][0]["href"],
                             publish_time = dt,

@@ -11,19 +11,17 @@ from src.feeds import get_twitter
 
 from tqdm import tqdm
 import pudb
-from src import io_utils
 import webbrowser
 import datetime
 from dateutil import parser
-
-
+from src.database import db
 
 def list_articles(source, label, all_entries):
-    articles = io_utils.read_label(source, label)
+    articles = db.read(source, label)
     if source == Sources.BLOGS: 
         articles = sorted(articles, key=lambda x:x.publish_time, reverse=True)
     elif source == Sources.TWITTER:
-        articles = sorted(articles, key=lambda x:x.publish_time, reverse=True)
+        articles = sorted(articles, key=lambda x:x.score, reverse=True)
         if not all_entries:
             articles = [article for article in articles if article.score > 0.15]
     elif source == Sources.NEWS:
@@ -52,13 +50,21 @@ def update(source):
 
 
     for entity in tqdm(entities, desc="IO operations"):
-        if not (io_utils.in_label(source, Labels.POSITIVE, entity) or \
-                io_utils.in_label(source, Labels.NEGATIVE, entity) or \
-                io_utils.in_label(source, Labels.UNLABELED, entity)):
-            io_utils.append(source, Labels.LATEST, entity)
-            io_utils.append(source, Labels.UNLABELED, entity)
+        if not (entity in db.read(source, Labels.POSITIVE) or \
+                entity in db.read(source, Labels.NEGATIVE) or \
+                entity in db.read(source, Labels.UNLABELED)):
+            db.append(source, Labels.LATEST, entity)
+            db.append(source, Labels.UNLABELED, entity)
 
-    io_utils.remove_old_entries(source, Labels.LATEST, datetime.timedelta(hours=24))
+    
+    now = datetime.datetime.now(datetime.timezone.utc)
+    time_limit = datetime.timedelta(hours=24)
+
+    for article in db.read(source, Labels.LATEST):
+        if time_limit < now - article.publish_time:
+            db.delete(source, Labels.LATEST, article)
+
+    db.write()
 
 def annotate(source, indices, label):
     articles = list_articles(source, Labels.LATEST, True)
@@ -66,17 +72,20 @@ def annotate(source, indices, label):
 
     for article in articles_to_annotate:
         if label == Labels.POSITIVE or label == Labels.NEGATIVE:
-            io_utils.remove(source, Labels.LATEST, article)
-            io_utils.remove(source, Labels.UNLABELED, article)
+            db.delete(source, Labels.LATEST, article)
+            db.delete(source, Labels.UNLABELED, article)
 
-        io_utils.append(source, label, article)
+        db.append(source, label, article)
 
-def open(source, label, numbers):
+    db.write()
+
+def open(source, numbers):
     for number in numbers:
-        articles = list_articles(source, label, True)
+        articles = list_articles(source, Labels.LATEST, True)
         article = articles[number]
-        webbrowser.open(article.target_link)
-    annotate(numbers, Labels.POSITIVE)
+        webbrowser.open(article.link)
+    annotate(source, numbers, Labels.POSITIVE)
+
 
 def train(source):
     dataset = TrainingDataset(source)
@@ -89,18 +98,18 @@ def update_scores(source):
     bert = Bert()
     bert.load(source)
     for label in [Labels.LATEST, Labels.POSITIVE, Labels.NEGATIVE, Labels.UNLABELED]:
-        articles = io_utils.read_label(label)
+        articles = db.read(source, label)
 
         dataset = ClassificationDataset(articles)
         classifications = bert.classify(dataset)
 
-        io_utils.clear_label(label)
         for score, article in zip(classifications, articles):
             article.score = score[0]
-            io_utils.append(label, article)
+            db.update(source, label, article)
+    db.write()
 
 def unlabeled(source):
-    articles = io_utils.read_label(Labels.UNLABELED)
+    articles = db.read(source, Labels.UNLABELED)
     articles = sorted(articles, key=lambda x:x.score, reverse=True)
     return articles
 
